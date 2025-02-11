@@ -73,7 +73,7 @@ model Session {
 model Props {
   id Int @id @default(autoincrement())
   title String
-  data String
+  content String
   public Boolean
 
   createdAt DateTime @default(now())
