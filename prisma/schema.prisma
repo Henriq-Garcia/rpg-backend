@@ -43,6 +43,8 @@ model Campaign {
   inviteCode  Invite?
   sessions    Session[]
   subscribers SubscribedUserCampaigns[]
+
+  @@unique([name, createdById])
 }
 
 model Invite {
