@@ -60,21 +60,33 @@ model Invite {
   session  Session?  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 }
 
-model Props {
+model Prop {
   id          Int       @id @default(autoincrement())
   title       String
   content     String
   type        PropTypes @default(Image)
   public      Boolean   @default(false)
   createdById Int
-  price       Float     @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // relationship
-  creator        User             @relation(fields: [createdById], references: [id])
+  creator        User             @relation(fields: [createdById], references: [id], onDelete: NoAction)
   userOwnedProps UserOwnedProps[]
+  purchasedProps PurchasedProps[]
+}
+
+model PurchasedProps {
+  userId      Int
+  propId      Int
+  purchasedAt DateTime @default(now())
+
+  // relationship
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prop Prop @relation(fields: [propId], references: [id], onDelete: Cascade)
+
+  @@id([userId, propId])
 }
 
 model Session {
@@ -114,11 +126,12 @@ model User {
   updatedAt DateTime @updatedAt
 
   // relationship
-  createdProps        Props[]
+  createdProps        Prop[]
   createdCampaigns    Campaign[]
   subscribedCampaigns SubscribedUserCampaigns[]
   ownedProps          UserOwnedProps[]
   sessionParticipate  SessionParticipants[]
+  purchasedProps      PurchasedProps[]
 }
 
 // helper tables
@@ -157,8 +170,8 @@ model UserOwnedProps {
   acquiredAt DateTime @default(now())
 
   // relationship
-  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  prop Props @relation(fields: [propId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prop Prop @relation(fields: [propId], references: [id], onDelete: Cascade)
 
   @@id([userId, propId])
 }
