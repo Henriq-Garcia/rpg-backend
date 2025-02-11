@@ -27,75 +27,74 @@ enum InviteType {
 
 // tables
 model Campaign {
-  id Int @id @default(autoincrement())
-  name String
-  systemId Int
+  id          Int     @id @default(autoincrement())
+  name        String
+  systemId    Int
   createdById Int
-  active Boolean @default(true)
-  public Boolean @default(true)
+  active      Boolean @default(true)
+  public      Boolean @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
 
   // relationship
-  system System @relation(fields: [systemId], references: [id], onDelete: Cascade)
-  createdBy User @relation(fields: [createdById], references: [id], onDelete: Cascade)
-  inviteCode Invite?
-  sessions Session[]
+  system      System                    @relation(fields: [systemId], references: [id], onDelete: Cascade)
+  createdBy   User                      @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  inviteCode  Invite?
+  sessions    Session[]
   subscribers SubscribedUserCampaigns[]
 }
 
 model Invite {
-  id          Int      @id @default(autoincrement())
-  code        String   @unique
-  type        InviteType
-  campaignId  Int?     @unique
-  sessionId   Int?     @unique
-  expiresAt   DateTime?
+  id         Int        @id @default(autoincrement())
+  code       String     @unique
+  type       InviteType
+  campaignId Int?       @unique
+  sessionId  Int?       @unique
+  expiresAt  DateTime?
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
   // relationship
-  campaign    Campaign? @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  session     Session?  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  campaign Campaign? @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  session  Session?  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 }
 
 model Props {
-  id Int @id @default(autoincrement())
-  title String
-  content String
-  type PropTypes @default(Image)
-  public Boolean @default(false)
+  id          Int       @id @default(autoincrement())
+  title       String
+  content     String
+  type        PropTypes @default(Image)
+  public      Boolean   @default(false)
   createdById Int
-  price Float @default(0)
+  price       Float     @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // relationship
-  creator User @relation(fields: [createdById], references: [id])
+  creator        User             @relation(fields: [createdById], references: [id])
   userOwnedProps UserOwnedProps[]
 }
 
 model Session {
-  id Int @id @default(autoincrement())
-  name String
-  public Boolean @default(true)
+  id         Int     @id @default(autoincrement())
+  name       String
+  public     Boolean @default(true)
   campaignId Int
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // relationship
-  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  inviteCode Invite?
+  campaign     Campaign              @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  inviteCode   Invite?
   participants SessionParticipants[]
 }
 
 model System {
-  id Int @id @default(autoincrement())
-  name String
+  id       Int    @id @default(autoincrement())
+  name     String
   ruleBook String
 
   createdAt DateTime @default(now())
@@ -106,46 +105,46 @@ model System {
 }
 
 model User {
-  id Int @id @default(autoincrement())
-  name String
-  email String @unique
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String @unique
   password String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // relationship
-  createdProps Props[]
-  createdCampaigns Campaign[]
+  createdProps        Props[]
+  createdCampaigns    Campaign[]
   subscribedCampaigns SubscribedUserCampaigns[]
-  ownedProps UserOwnedProps[]
-  sessionParticipate SessionParticipants[]
+  ownedProps          UserOwnedProps[]
+  sessionParticipate  SessionParticipants[]
 }
 
 // helper tables
 model SessionParticipants {
   sessionId Int
-  userId Int
-  role GameRole @default(Player)
+  userId    Int
+  role      GameRole @default(Player)
 
   joinedAt DateTime @default(now())
 
   // relationship
   session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([sessionId, userId])
 }
 
 model SubscribedUserCampaigns {
-  userId Int
+  userId     Int
   campaignId Int
-  role GameRole @default(Player)
+  role       GameRole @default(Player)
 
   subscribedAt DateTime @default(now())
 
   // relationship
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@id([userId, campaignId])
@@ -158,9 +157,8 @@ model UserOwnedProps {
   acquiredAt DateTime @default(now())
 
   // relationship
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   prop Props @relation(fields: [propId], references: [id], onDelete: Cascade)
 
   @@id([userId, propId])
 }
-
