@@ -43,7 +43,7 @@ export class CampaignService {
         }))
     }
 
-    async getCampaign(where: GetCampaignDto) {
+    async getCampaign(where: GetCampaignDto): Promise<CampaignEntity> {
         const campaignResult = await this.prisma.campaign.findUnique({
             where
         });
