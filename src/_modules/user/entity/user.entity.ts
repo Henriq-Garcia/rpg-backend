@@ -1,4 +1,5 @@
 import { CampaignEntity } from "src/_modules/campaign/entity/campaign.entity";
+import { PropEntity } from "../../props/entity/prop.entity";
 
 export class UserEntity {
     id: number;
@@ -8,6 +9,6 @@ export class UserEntity {
     updatedAt: Date;
     createdCampaigns?: CampaignEntity[];
     subscribedCampaigns?: CampaignEntity[]
-    ownedProps?: any[];
+    ownedProps?: PropEntity[];
     sessionsParticipate?: any[]
 }
