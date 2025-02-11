@@ -7,34 +7,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id Int @id @default(autoincrement())
-  name String
-  email String @unique
-  password String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // relationship
-  createdCampaigns Campaign[]
-  subscribedCampaigns SubscribedUserCampaigns[]
-  ownedProps UserOwnedProps[]
-  sessionParticipate SessionParticipants[]
+// enums
+enum PropTypes {
+  Token
+  Map
+  Image
 }
 
-model System {
-  id Int @id @default(autoincrement())
-  name String
-  ruleBook String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // relationship
-  campaigns Campaign[]
+enum GameRole {
+  GM
+  Player
+  Observer
 }
 
+enum InviteType {
+  Campaign
+  Session
+}
+
+// tables
 model Campaign {
   id Int @id @default(autoincrement())
   name String
@@ -55,6 +46,38 @@ model Campaign {
   subscribers SubscribedUserCampaigns[]
 }
 
+model Invite {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique
+  type        InviteType
+  campaignId  Int?     @unique
+  sessionId   Int?     @unique
+  expiresAt   DateTime?
+
+  createdAt   DateTime @default(now())
+
+  // relationship
+  campaign    Campaign? @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  session     Session?  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model Props {
+  id Int @id @default(autoincrement())
+  title String
+  content String
+  type PropTypes @default(Image)
+  public Boolean @default(false)
+  createdById Int
+  price Float @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relationship
+  creator User @relation(fields: [createdById], references: [id])
+  userOwnedProps UserOwnedProps[]
+}
+
 model Session {
   id Int @id @default(autoincrement())
   name String
@@ -70,41 +93,54 @@ model Session {
   participants SessionParticipants[]
 }
 
-model Props {
+model System {
   id Int @id @default(autoincrement())
-  title String
-  content String
-  public Boolean
+  name String
+  ruleBook String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // relationship
-  userOwnedProps UserOwnedProps[]
+  campaigns Campaign[]
 }
 
-model Invite {
-  id          Int      @id @default(autoincrement())
-  code        String   @unique
-  type        String
-  campaignId  Int?     @unique
-  sessionId   Int?     @unique
-  expiresAt   DateTime?
+model User {
+  id Int @id @default(autoincrement())
+  name String
+  email String @unique
+  password String
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // relationship
-  campaign    Campaign? @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  session     Session?  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  createdProps Props[]
+  createdCampaigns Campaign[]
+  subscribedCampaigns SubscribedUserCampaigns[]
+  ownedProps UserOwnedProps[]
+  sessionParticipate SessionParticipants[]
 }
 
-
-
 // helper tables
+model SessionParticipants {
+  sessionId Int
+  userId Int
+  role GameRole @default(Player)
+
+  joinedAt DateTime @default(now())
+
+  // relationship
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([sessionId, userId])
+}
+
 model SubscribedUserCampaigns {
   userId Int
   campaignId Int
-  role String @default("player")
+  role GameRole @default(Player)
 
   subscribedAt DateTime @default(now())
 
@@ -128,16 +164,3 @@ model UserOwnedProps {
   @@id([userId, propId])
 }
 
-model SessionParticipants {
-  sessionId Int
-  userId Int
-  role String @default("player")
-
-  joinedAt DateTime @default(now())
-
-  // relationship
-  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([sessionId, userId])
-}
