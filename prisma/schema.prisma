@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  name String
+  email String @unique
+  password String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relationship
+  createdCampaigns Campaign[]
+  subscribedCampaigns SubscribedUserCampaigns[]
+  ownedProps UserOwnedProps[]
+  sessionParticipate SessionParticipants[]
+}
+
+model System {
+  id Int @id @default(autoincrement())
+  name String
+  ruleBook String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relationship
+  campaigns Campaign[]
+}
+
+model Campaign {
+  id Int @id @default(autoincrement())
+  name String
+  systemId Int
+  createdById Int
+  active Boolean @default(true)
+  public Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+
+  // relationship
+  system System @relation(fields: [systemId], references: [id], onDelete: Cascade)
+  createdBy User @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  inviteCode Invite?
+  sessions Session[]
+  subscribers SubscribedUserCampaigns[]
+}
+
+model Session {
+  id Int @id @default(autoincrement())
+  name String
+  public Boolean @default(true)
+  campaignId Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relationship
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  inviteCode Invite?
+  participants SessionParticipants[]
+}
+
+model Props {
+  id Int @id @default(autoincrement())
+  title String
+  data String
+  public Boolean
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relationship
+  userOwnedProps UserOwnedProps[]
+}
+
+model Invite {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique
+  type        String
+  campaignId  Int?     @unique
+  sessionId   Int?     @unique
+  expiresAt   DateTime?
+
+  createdAt   DateTime @default(now())
+
+  // relationship
+  campaign    Campaign? @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  session     Session?  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+
+
+// helper tables
+model SubscribedUserCampaigns {
+  userId Int
+  campaignId Int
+  role String @default("player")
+
+  subscribedAt DateTime @default(now())
+
+  // relationship
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@id([userId, campaignId])
+}
+
+model UserOwnedProps {
+  userId Int
+  propId Int
+
+  acquiredAt DateTime @default(now())
+
+  // relationship
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prop Props @relation(fields: [propId], references: [id], onDelete: Cascade)
+
+  @@id([userId, propId])
+}
+
+model SessionParticipants {
+  sessionId Int
+  userId Int
+  role String @default("player")
+
+  joinedAt DateTime @default(now())
+
+  // relationship
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([sessionId, userId])
+}
