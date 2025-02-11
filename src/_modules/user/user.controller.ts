@@ -2,7 +2,6 @@ import { Body, Controller, Get, ParseIntPipe, Post, Query } from '@nestjs/common
 import { CreateUserDto } from './dto/create-user.dto';
 import { HashPassword } from 'src/_pipes/hash.pipe';
 import { UserService } from './user.service';
-import { FindUserDto } from './dto/find-user.dto';
 
 @Controller('user')
 export class UserController {
@@ -16,7 +15,12 @@ export class UserController {
     }
 
     @Get()
-    async findUser(@Query('id', ParseIntPipe) id: number, @Query('email') email: string) {
-        return await this.userService.findUser({ id, email });
+    async findUser(
+        @Query('email') email?: string,
+        @Query('id') id?: string
+    ) {
+        const userId = id ? parseInt(id, 10) : undefined;
+        return await this.userService.findUser({ id: userId, email });
     }
+
 }
