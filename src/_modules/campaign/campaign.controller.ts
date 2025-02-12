@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, ParseIntPipe, Post, Query } from '@nestjs/common';
 import { CreateCampaignDto } from './dto/create-campaign.dto';
 import { CampaignService } from './campaign.service';
 import { GetCampaignDto } from './dto/get-campaign.dto';
@@ -14,7 +14,7 @@ export class CampaignController {
     }
 
     @Get()
-    async getCampaign(@Query() where: GetCampaignDto) {
-        return await this.campaignService.getCampaign(where)
+    async getCampaign(@Query('id', ParseIntPipe) id: number) {
+        return await this.campaignService.getCampaign({ id })
     }
 }
