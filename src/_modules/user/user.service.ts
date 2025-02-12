@@ -22,9 +22,7 @@ export class UserService {
         const where = param.id ? { id: param.id } : param.email ? { email: param.email } : null;
         if (!where) throw new BadRequestException('Invalid params');
 
-        const userResult = await this.prisma.user.findUnique({
-            where
-        });
+        const userResult = await this.prisma.user.findUnique({ where });
         
         if (!userResult) throw new NotFoundException('User not found');
         const { password, createdAt, updatedAt, ...user } = userResult;
