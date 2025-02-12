@@ -108,7 +108,7 @@ model Session {
 
 model System {
   id       Int    @id @default(autoincrement())
-  name     String
+  name     String @unique
   ruleBook String
 
   createdAt DateTime @default(now())
