@@ -3,6 +3,7 @@ import { PrismaService } from '../database/prisma.service';
 import { CreateSystemDto } from './dto/create-system.dto';
 import { SystemEntity } from './entity/system.entity';
 import { FindSystemDto } from './dto/find-system.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class SystemService {
@@ -26,10 +27,10 @@ export class SystemService {
     }
 
     async getSystem(param: FindSystemDto) {
-        const where = param.id ? { id: param.id } : param.name ? { name: param.name } : null;
+        const where = param.id ? { id: param.id } : param.name ? { name: { contains: param.name, mode: Prisma.QueryMode.insensitive } } : null;
         if (!where) throw new BadRequestException('Invalid params');
 
-        const result = await this.prisma.system.findUnique({ where });
+        const result = await this.prisma.system.findFirst({ where });
 
         if (!result) throw new NotFoundException('User not found');
         const { createdAt, ...system } = result;
