@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { CreateSystemDto } from './dto/create-system.dto';
 import { SystemEntity } from './entity/system.entity';
+import { FindSystemDto } from './dto/find-system.dto';
 
 @Injectable()
 export class SystemService {
@@ -22,5 +23,16 @@ export class SystemService {
             ruleBook: system.ruleBook,
             updatedAt: system.updatedAt
         }));
+    }
+
+    async getSystem(param: FindSystemDto) {
+        const where = param.id ? { id: param.id } : param.name ? { name: param.name } : null;
+        if (!where) throw new BadRequestException('Invalid params');
+
+        const result = await this.prisma.system.findUnique({ where });
+
+        if (!result) throw new NotFoundException('User not found');
+        const { createdAt, ...system } = result;
+        return system;
     }
 }
