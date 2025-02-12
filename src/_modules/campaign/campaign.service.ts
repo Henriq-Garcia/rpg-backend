@@ -4,15 +4,24 @@ import { CreateCampaignDto } from './dto/create-campaign.dto';
 import { CampaignEntity } from './entity/campaign.entity';
 import { FilterCampaignDto } from './dto/filter-campaigns.dto';
 import { GetCampaignDto } from './dto/get-campaign.dto';
+import { InviteService } from 'src/_common/invite.service';
 
 @Injectable()
 export class CampaignService {
 
-    constructor(private prisma: PrismaService) {}
+    constructor(
+        private prisma: PrismaService,
+        private invite: InviteService
+    ) {}
 
     async createCampaign(data: CreateCampaignDto): Promise<CampaignEntity> {
         const createdCampaign = await this.prisma.campaign.create({ data });
         const { updatedAt, ...campaign  } = createdCampaign;
+        if (!data.public) {
+            this.prisma.invite.create({
+                data: { campaignId: campaign.id, type: 'Campaign', code: this.invite.generateInviteCode() }
+            })
+        }
         return campaign;
     }
 
